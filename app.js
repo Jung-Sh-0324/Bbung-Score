@@ -316,7 +316,7 @@ function renderScoreInputs() {
     label.className = "field";
     label.innerHTML = `
       <span>${player.name}</span>
-      <input class="scoreInput" data-index="${index}" type="number" value="" placeholder="0" inputmode="numeric" />
+      <input class="scoreInput" data-index="${index}" type="number" value="" placeholder="점수" inputmode="numeric" />
     `;
     box.appendChild(label);
   });
@@ -564,6 +564,18 @@ $("resetAllBtn").addEventListener("click", () => {
   if (!confirm("현재 게임 기록을 모두 지우고 처음부터 시작할까요?")) return;
   localStorage.removeItem(STORAGE_KEY);
   location.reload();
+});
+
+document.addEventListener("focusin", (event) => {
+  const input = event.target;
+
+  if (!input.matches(".scoreInput, .historyInput")) return;
+
+  if (input.value === "0") {
+    input.value = "";
+  }
+
+  setTimeout(() => input.select?.(), 0);
 });
 
 function init() {
