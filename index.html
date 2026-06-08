@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>뻥 점수 계산기</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Card Score Helper</p>
+        <h1>뻥 점수 계산기</h1>
+        <p class="subtitle">낮은 점수가 이기는 카드게임용 누적 점수판</p>
+      </div>
+      <button id="resetAllBtn" class="ghost danger hidden" type="button">🏠</button>
+    </header>
+
+    <section id="setupScreen" class="card screen active">
+      <h2>게임 설정</h2>
+      <p class="hint">판수, 플레이어 수, 순위별 벌금을 먼저 정해주세요.</p>
+
+      <div class="field">
+        <span>진행 판수</span>
+        <div class="stepper">
+          <button class="stepBtn" type="button" data-target="roundCount" data-step="-1" aria-label="진행 판수 내리기">−</button>
+          <input id="roundCount" type="number" min="1" max="50" value="10" inputmode="numeric" />
+          <button class="stepBtn" type="button" data-target="roundCount" data-step="1" aria-label="진행 판수 올리기">+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span>플레이어 / 팀 수</span>
+        <div class="stepper">
+          <button class="stepBtn" type="button" data-target="playerCount" data-step="-1" aria-label="플레이어 팀 수 내리기">−</button>
+          <input id="playerCount" type="number" min="3" max="5" value="4" inputmode="numeric" readonly />
+          <button class="stepBtn" type="button" data-target="playerCount" data-step="1" aria-label="플레이어 팀 수 올리기">+</button>
+        </div>
+      </div>
+
+      <div class="subhead">
+        <h3>순위별 벌금</h3>
+        <p>예: 1등 0원, 꼴등 10,000원처럼 자유롭게 입력</p>
+      </div>
+      <div id="penaltyInputs" class="grid"></div>
+
+      <button id="toNameBtn" class="primary" type="button">다음</button>
+    </section>
+
+    <section id="nameScreen" class="card screen">
+      <h2>이름 정하기</h2>
+      <p class="hint">점수를 기록할 플레이어 또는 팀 이름을 입력해주세요.</p>
+      <div id="nameInputs" class="grid"></div>
+      <div class="buttonRow equalButtons nameActionRow">
+        <button id="backToSetupBtn" class="ghost" type="button">이전</button>
+        <button id="startGameBtn" class="primary noMargin" type="button">게임 시작</button>
+      </div>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <section class="card statusCard">
+        <div>
+          <p class="eyebrow">현재 진행</p>
+          <h2><span id="currentRoundText">1</span> / <span id="totalRoundText">10</span>판</h2>
+        </div>
+        <button id="saveRoundBtn" class="primary small" type="button">점수 저장</button>
+      </section>
+
+      <section class="card">
+        <h2>이번 판 점수 입력</h2>
+        <p class="hint">각 팀의 이번 판 점수를 입력하고 저장해주세요.</p>
+        <div id="scoreInputs" class="scoreGrid"></div>
+      </section>
+
+
+      <section class="card">
+        <h2>누적 점수표</h2>
+        <p class="hint">순위와 벌금은 표 상단에서 팀별 열에 맞춰 표시됩니다.</p>
+        <div id="scoreBoard" class="scoreBoardWrap"></div>
+      </section>
+
+      <section class="card">
+        <h2>판별 기록 / 수정</h2>
+        <p class="hint">잘못 입력한 기록은 언제든 수정할 수 있어요.</p>
+        <div id="roundHistory" class="history"></div>
+      </section>
+    </section>
+  </main>
+
+
+
+  <div id="gameEndModal" class="modalOverlay hidden" role="dialog" aria-modal="true">
+    <div class="modalCard">
+      <p class="eyebrow">Game Over</p>
+      <h2>게임이 종료됐어요 🎉</h2>
+      <p class="hint">모든 판이 끝났고 동점도 없어 최종 순위가 확정됐습니다.</p>
+      <div id="finalResultList" class="finalResultList"></div>
+      <div class="buttonRow equalButtons modalActions threeActions">
+        <button id="shareResultBtn" class="ghost shareButton" type="button">카카오톡 공유</button>
+        <button id="finishGameBtn" class="ghost" type="button">게임 종료</button>
+        <button id="nextGameBtn" class="primary noMargin" type="button">다음 경기 진행</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="nextGameModal" class="modalOverlay hidden" role="dialog" aria-modal="true">
+    <div class="modalCard">
+      <p class="eyebrow">Next Game</p>
+      <h2>다음 경기 설정</h2>
+      <p class="hint">기존 판수와 팀명을 유지하거나 필요한 부분만 바꿔서 다음 경기를 시작할 수 있어요.</p>
+
+      <label class="checkRow">
+        <input id="keepRoundCheck" type="checkbox" checked />
+        <span>판수 유지</span>
+      </label>
+      <label class="field modalField">
+        <span>진행 판수</span>
+        <input id="nextRoundCount" type="number" min="1" max="50" value="10" inputmode="numeric" disabled />
+      </label>
+
+      <label class="checkRow">
+        <input id="keepNamesCheck" type="checkbox" checked />
+        <span>팀명 유지</span>
+      </label>
+      <div id="nextNameInputs" class="grid dimmed"></div>
+
+      <div class="buttonRow equalButtons modalActions">
+        <button id="cancelNextGameBtn" class="ghost" type="button">취소</button>
+        <button id="confirmNextGameBtn" class="primary noMargin" type="button">게임 진행</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <script src="app.js"></script>
+</body>
+</html>
